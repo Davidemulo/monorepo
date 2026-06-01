@@ -25,6 +25,8 @@ import {
   aiRiskScoringService,
 } from "./aiRiskScoringService.js";
 import type { AiRiskScoreResult } from "./aiRiskScoreProvider.js";
+import { creditScoreService } from './creditScoreService.js';
+import type { CreditScoreFactor } from '../models/creditScoreSnapshot.js';
 
 export interface UnderwritingEvaluationInput {
   applicationId: string;
@@ -147,6 +149,33 @@ export class UnderwritingService {
     }
 
     const result = this.ruleEngine.evaluate(context);
+    const ruleConfig = this.ruleEngine.getConfig();
+    const ruleConfigById = new Map(ruleConfig.rules.map((rule) => [rule.ruleId, rule]));
+    const scorePercentage = result.maxScore > 0
+      ? Math.max(0, Math.min(100, Math.round((result.totalScore / result.maxScore) * 100)))
+      : 0;
+    const snapshotFactors: CreditScoreFactor[] = result.triggeredRules.map((evaluation) => {
+      const rule = ruleConfigById.get(evaluation.ruleId);
+      const status = evaluation.passed
+        ? (evaluation.score >= evaluation.weight ? 'pass' : 'warn')
+        : rule?.severity === 'critical'
+          ? 'fail'
+          : 'warn';
+
+      return {
+        name: evaluation.ruleId,
+        status,
+        weight: evaluation.weight,
+        detail: evaluation.reason,
+      };
+    });
+
+    await creditScoreService.recordSnapshot({
+      userId: application.userId,
+      score: scorePercentage,
+      factors: snapshotFactors,
+      computedAt: new Date(result.evaluatedAt),
+    });
 
     let finalDecision =
       creditDecision !== undefined

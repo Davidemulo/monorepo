@@ -114,6 +114,7 @@ import {
   PostgresUnderwritingDecisionTraceStore,
   initUnderwritingDecisionTraceStore,
 } from "./models/underwritingDecisionTraceStore.js";
+import { PostgresCreditScoreSnapshotStore, initCreditScoreSnapshotStore } from "./models/creditScoreSnapshot.js";
 import {
   PostgresPartnerLandlordApplicationStore,
   initPartnerLandlordApplicationStore,
@@ -128,6 +129,7 @@ import { createComplianceReportRouter } from "./routes/complianceReport.js";
 import { createTenantCreditScoringRouter } from "./routes/tenantCreditScoring.js";
 import { createTenantOnboardingRouter } from "./routes/tenantOnboarding.js";
 import { createAdminTenantCreditScoreRouter } from "./routes/adminTenantCreditScore.js";
+import { createAdminCreditScoreRouter, createCreditScoreRouter } from "./routes/creditScore.js";
 import { createTenantDocumentVaultRouter } from "./routes/tenantDocumentVault.js";
 import { createLandlordPayoutScheduleRouter } from "./routes/landlordPayoutSchedule.js";
 import { createDocsRouter } from "./routes/docs.js";
@@ -398,6 +400,7 @@ export function createApp() {
     initUnderwritingDecisionTraceStore(
       new PostgresUnderwritingDecisionTraceStore(),
     );
+    initCreditScoreSnapshotStore(new PostgresCreditScoreSnapshotStore());
   }
 
   // Indexer
@@ -595,6 +598,8 @@ export function createApp() {
   app.use("/api/admin/whistleblower-applications", createAdminWhistleblowerApplicationsRouter());
   app.use("/api/admin/underwriting", createAdminUnderwritingRouter());
   app.use("/api/admin", createAdminTenantCreditScoreRouter());
+  app.use("/api/credit-score", createCreditScoreRouter());
+  app.use("/api/admin", createAdminCreditScoreRouter());
   app.use("/api/admin", createSettlementAdminRouter());
   app.use(
     "/api/staking",

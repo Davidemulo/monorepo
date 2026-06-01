@@ -4,6 +4,7 @@ import { UnderwritingRuleEngine, DEFAULT_RULE_CONFIG } from './underwritingRuleE
 import { tenantApplicationStore } from '../models/tenantApplicationStore.js'
 import { userRiskStateStore } from '../models/userRiskStateStore.js'
 import { underwritingDecisionTraceStore } from '../models/underwritingDecisionTraceStore.js'
+import { creditScoreSnapshotStore } from '../models/creditScoreSnapshot.js'
 
 describe('UnderwritingService', () => {
   let service: UnderwritingService
@@ -16,6 +17,7 @@ describe('UnderwritingService', () => {
     await (tenantApplicationStore as any).clear?.()
     await (userRiskStateStore as any).clear?.()
     await (underwritingDecisionTraceStore as any).clear?.()
+    await creditScoreSnapshotStore.clear()
   })
 
   describe('evaluateApplication', () => {
@@ -53,6 +55,11 @@ describe('UnderwritingService', () => {
       )
       expect(traces).toHaveLength(1)
       expect(traces[0].decision).toBe(result.decision)
+
+      const snapshot = await creditScoreSnapshotStore.getLatestByUserId(application.userId)
+      expect(snapshot?.userId).toBe(application.userId)
+      expect(snapshot?.score).toBeGreaterThanOrEqual(0)
+      expect(snapshot?.factors.length).toBeGreaterThan(0)
     })
 
     it('should throw error for non-existent application', async () => {
