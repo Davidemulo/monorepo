@@ -62,6 +62,7 @@ export enum ErrorCode {
 
   // Resources
   NOT_FOUND = "NOT_FOUND",
+  NO_SCORE_YET = "NO_SCORE_YET",
   CONFLICT = "CONFLICT",
   LISTING_ALREADY_RENTED = "LISTING_ALREADY_RENTED",
   INVALID_STATE_TRANSITION = "INVALID_STATE_TRANSITION",
@@ -101,6 +102,7 @@ export const ERROR_CLASSIFICATION: Record<string, ErrorClassification> = {
   [ErrorCode.FORBIDDEN]: "permanent",
   [ErrorCode.TOO_MANY_REQUESTS]: "transient",
   [ErrorCode.NOT_FOUND]: "permanent",
+  [ErrorCode.NO_SCORE_YET]: "permanent",
   [ErrorCode.CONFLICT]: "permanent",
   [ErrorCode.LISTING_ALREADY_RENTED]: "permanent",
   [ErrorCode.INVALID_STATE_TRANSITION]: "permanent",

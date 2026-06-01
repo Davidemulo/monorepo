@@ -11,6 +11,7 @@ import { TxType } from '../outbox/types.js'
 import { settleFullPaymentIncentive } from '../services/fullPaymentIncentiveSettlement.js'
 import { enqueueDelivery } from '../services/webhookDeliveryService.js'
 import { WebhookEventType } from '../models/webhookSubscription.js'
+import { idempotency } from '../middleware/idempotency.js'
 
 
 export function createPaymentsRouter(adapter: SorobanAdapter) {
@@ -32,6 +33,7 @@ export function createPaymentsRouter(adapter: SorobanAdapter) {
    */
   router.post(
     '/confirm',
+    idempotency(),
     validate(confirmPaymentSchema),
     async (req: Request, res: Response, next: NextFunction) => {
       try {

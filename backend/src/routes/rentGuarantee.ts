@@ -1,3 +1,4 @@
+import { idempotency } from '../middleware/idempotency.js';
 import { Router } from 'express'
 import { getPool } from '../db.js'
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.js'
@@ -64,7 +65,7 @@ export function createRentGuaranteeRouter(provider: RentGuaranteeProvider): Rout
     }
   })
 
-  router.post('/deals/:dealId/insurance/purchase', authenticateToken, async (req: AuthenticatedRequest, res, next) => {
+  router.post('/deals/:dealId/insurance/purchase', authenticateToken, idempotency(), async (req: AuthenticatedRequest, res, next) => {
     try {
       assertLandlordOrAdmin(req)
       const { dealId } = req.params

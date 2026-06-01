@@ -12,6 +12,7 @@ import {
 } from "../models/listingApplication.js";
 import { AppError } from "../errors/AppError.js";
 import { ErrorCode } from "../errors/errorCodes.js";
+import { idempotency } from '../middleware/idempotency.js';
 
 const router = Router();
 
@@ -21,6 +22,7 @@ const router = Router();
  */
 router.post(
   "/listings/:listingId/apply",
+  idempotency(),
   async (req: Request, res: Response, next) => {
     try {
       const { listingId } = req.params;
